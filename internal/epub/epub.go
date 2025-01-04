@@ -5,6 +5,11 @@ import (
 	"encoding/xml"
 )
 
+const (
+	PropertyCover = "cover-image"
+	PropertyNav   = "nav"
+)
+
 type Epub struct {
 	Container *Container
 	Package   *Package
@@ -20,6 +25,7 @@ type Container struct {
 type Package struct {
 	Metadata Metadata `xml:"metadata"`
 	Manifest Manifest `xml:"manifest"`
+	Spine    Spine    `xml:"spine"`
 }
 
 type Metadata struct {
@@ -34,6 +40,10 @@ type Metadata struct {
 
 type Manifest struct {
 	Items []ManifestItem `xml:"item"`
+
+	IDMap     map[string]ManifestItem
+	CoverPath string
+	NavPath   string
 }
 
 type ManifestItem struct {
@@ -41,6 +51,14 @@ type ManifestItem struct {
 	Href       string `xml:"href,attr"`
 	MediaType  string `xml:"media-type,attr"`
 	Properties string `xml:"properties,attr"`
+}
+
+type Spine struct {
+	Items []SpintItem `xml:"itemref"`
+}
+
+type SpintItem struct {
+	IDref string `xml:"idref,attr"`
 }
 
 func New(fileName string) *Epub {
@@ -75,9 +93,7 @@ func parseContainer(r *zip.ReadCloser) (*Container, error) {
 	}
 
 	decoder := xml.NewDecoder(file)
-
-	err = decoder.Decode(&container)
-	if err != nil {
+	if err := decoder.Decode(&container); err != nil {
 		return nil, err
 	}
 
@@ -93,10 +109,21 @@ func parsePackage(r *zip.ReadCloser, path string) (*Package, error) {
 	}
 
 	decoder := xml.NewDecoder(file)
-
-	err = decoder.Decode(&pack)
-	if err != nil {
+	if err := decoder.Decode(&pack); err != nil {
 		return nil, err
+	}
+
+	pack.Manifest.IDMap = make(map[string]ManifestItem)
+
+	for _, v := range pack.Manifest.Items {
+		pack.Manifest.IDMap[v.ID] = v
+
+		switch v.Properties {
+		case PropertyCover:
+			pack.Manifest.CoverPath = v.Href
+		case PropertyNav:
+			pack.Manifest.NavPath = v.Href
+		}
 	}
 
 	return &pack, nil
