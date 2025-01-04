@@ -3,11 +3,15 @@ package epub
 import (
 	"archive/zip"
 	"encoding/xml"
+	"errors"
+	"os"
 )
 
 const (
 	PropertyCover = "cover-image"
 	PropertyNav   = "nav"
+	MetaNameCover = "cover"
+	ContainerPath = "META-INF/container.xml"
 )
 
 type Epub struct {
@@ -36,14 +40,18 @@ type Metadata struct {
 	Date        string `xml:"date"`
 	Description string `xml:"description"`
 	Creator     string `xml:"creator"`
+	CoverPath   string
+	NavPath     string
+
+	Meta []struct {
+		Name    string `xml:"name,attr"`
+		Content string `xml:"content,attr"`
+	} `xml:"meta"`
 }
 
 type Manifest struct {
 	Items []ManifestItem `xml:"item"`
-
-	IDMap     map[string]ManifestItem
-	CoverPath string
-	NavPath   string
+	IDMap map[string]ManifestItem
 }
 
 type ManifestItem struct {
@@ -61,33 +69,38 @@ type SpintItem struct {
 	IDref string `xml:"idref,attr"`
 }
 
-func New(fileName string) *Epub {
-	r, err := zip.OpenReader(fileName)
+func New(filePath string) (*Epub, error) {
+	r, err := zip.OpenReader(filePath)
 	if err != nil {
-		panic(err)
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, ErrNotFound
+		}
+		if errors.Is(err, zip.ErrFormat) {
+			return nil, ErrInvalid
+		}
 	}
 
 	con, err := parseContainer(r)
 	if err != nil {
-		panic(err)
+		return nil, ErrInvalid
 	}
 
 	pack, err := parsePackage(r, con.RootFile.FullPath)
 	if err != nil {
-		panic(err)
+		return nil, ErrInvalid
 	}
 
 	return &Epub{
 		Container: con,
 		Package:   pack,
 		reader:    r,
-	}
+	}, nil
 }
 
 func parseContainer(r *zip.ReadCloser) (*Container, error) {
 	var container Container
 
-	file, err := r.Open("META-INF/container.xml")
+	file, err := r.Open(ContainerPath)
 	if err != nil {
 		return nil, err
 	}
@@ -120,9 +133,17 @@ func parsePackage(r *zip.ReadCloser, path string) (*Package, error) {
 
 		switch v.Properties {
 		case PropertyCover:
-			pack.Manifest.CoverPath = v.Href
+			pack.Metadata.CoverPath = v.Href
 		case PropertyNav:
-			pack.Manifest.NavPath = v.Href
+			pack.Metadata.NavPath = v.Href
+		}
+	}
+
+	if pack.Metadata.CoverPath == "" {
+		for _, v := range pack.Metadata.Meta {
+			if v.Name == MetaNameCover {
+				pack.Metadata.CoverPath = pack.Manifest.IDMap[v.Content].Href
+			}
 		}
 	}
 
