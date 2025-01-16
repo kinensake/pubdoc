@@ -14,6 +14,11 @@ const (
 	ContainerPath = "META-INF/container.xml"
 )
 
+var (
+	ErrInvalid  = errors.New("epub: invalid file")
+	ErrNotFound = errors.New("epub: file not found")
+)
+
 type Epub struct {
 	Container *Container
 	Package   *Package
@@ -78,6 +83,7 @@ func New(filePath string) (*Epub, error) {
 		if errors.Is(err, zip.ErrFormat) {
 			return nil, ErrInvalid
 		}
+		return nil, err
 	}
 
 	con, err := parseContainer(r)

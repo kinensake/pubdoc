@@ -31,3 +31,13 @@ func (e Epub) GetFile(idRef string) fs.File {
 
 	return file
 }
+
+func (e Epub) GetSpineIDRefs() []string {
+	var refs []string
+
+	for _, v := range e.Package.Spine.Items {
+		refs = append(refs, v.IDref)
+	}
+
+	return refs
+}
