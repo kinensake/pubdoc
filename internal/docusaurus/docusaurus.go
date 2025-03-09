@@ -21,10 +21,14 @@ import (
 //go:embed project/*
 var em embed.FS
 
+// NewProject creates a new Docusaurus project with the specified name.
+// It copies the embedded project template to the destination directory.
 func NewProject(name string) error {
 	return copyDir(name, "project")
 }
 
+// copyDir recursively copies a directory from the embedded filesystem to the destination.
+// It creates the destination directory if it doesn't exist and copies all files and subdirectories.
 func copyDir(dstDir string, srcDir string) error {
 	_ = os.Mkdir(dstDir, os.ModePerm)
 
@@ -62,6 +66,9 @@ func copyDir(dstDir string, srcDir string) error {
 	return nil
 }
 
+// AddEpub converts an EPUB file to Markdown files in a Docusaurus project.
+// It extracts content from the EPUB file, processes HTML to Markdown,
+// and organizes the content in the docs directory.
 func AddEpub(epubPath string) error {
 	e, err := epub.New(epubPath)
 	if err != nil {
@@ -115,6 +122,8 @@ func AddEpub(epubPath string) error {
 	return nil
 }
 
+// getHTML retrieves HTML content from an EPUB file using the provided ID reference.
+// It returns the sanitized HTML content, the directory path, the filename, and any error encountered.
 func getHTML(e *epub.Epub, idRef string) (string, string, string, error) {
 	f := e.GetFile(idRef)
 	if f == nil {
@@ -125,6 +134,8 @@ func getHTML(e *epub.Epub, idRef string) (string, string, string, error) {
 	return sanitizeHTML(f), e.GetDir(idRef), e.GetFilename(idRef), nil
 }
 
+// writeToProject writes the Markdown content to a file in the project directory.
+// It applies a template to the content and includes the position for ordering.
 func writeToProject(md string, docDir string, pos int, filename string) error {
 	tmpl, err := template.New("doc").Parse(docTmpl)
 	if err != nil {
@@ -149,6 +160,8 @@ func writeToProject(md string, docDir string, pos int, filename string) error {
 	return nil
 }
 
+// copyImageToProject copies images from the EPUB to the project's asset directory.
+// It updates image references in the HTML to point to the new locations.
 func copyImageToProject(e *epub.Epub, html string, htmlDir string, assetDir string) (string, error) {
 	r := bytes.NewBufferString(html)
 
@@ -195,6 +208,8 @@ func copyImageToProject(e *epub.Epub, html string, htmlDir string, assetDir stri
 	return modified, nil
 }
 
+// replaceDocHref updates HTML anchor links to point to Markdown files instead of HTML files.
+// This ensures proper navigation between documents in the Docusaurus project.
 func replaceDocHref(html string) (string, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewBufferString(html))
 	if err != nil {
