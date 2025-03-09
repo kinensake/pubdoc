@@ -1,16 +1,25 @@
 package epub
 
 import (
-	"fmt"
 	"io/fs"
+	"path/filepath"
 )
 
 func fullPath(path string) string {
-	return fmt.Sprintf("OEBPS/%s", path)
+	return filepath.Join("OEBPS", path)
 }
 
 func (e Epub) GetCoverFile() fs.File {
 	file, err := e.reader.Open(fullPath(e.Package.Metadata.CoverPath))
+	if err != nil {
+		return nil
+	}
+
+	return file
+}
+
+func (e Epub) GetFileFromPath(path string) fs.File {
+	file, err := e.reader.Open(path)
 	if err != nil {
 		return nil
 	}
@@ -24,12 +33,7 @@ func (e Epub) GetFile(idRef string) fs.File {
 		return nil
 	}
 
-	file, err := e.reader.Open(fullPath(item.Href))
-	if err != nil {
-		return nil
-	}
-
-	return file
+	return e.GetFileFromPath(fullPath(item.Href))
 }
 
 func (e Epub) GetSpineIDRefs() []string {
@@ -40,4 +44,22 @@ func (e Epub) GetSpineIDRefs() []string {
 	}
 
 	return refs
+}
+
+func (e Epub) GetDir(idRef string) string {
+	item, ok := e.Package.Manifest.IDMap[idRef]
+	if !ok {
+		return ""
+	}
+
+	return filepath.Dir(fullPath(item.Href))
+}
+
+func (e Epub) GetFilename(idRef string) string {
+	item, ok := e.Package.Manifest.IDMap[idRef]
+	if !ok {
+		return ""
+	}
+
+	return filepath.Base(item.Href)
 }
