@@ -167,6 +167,7 @@
 
 /* Reading experience enhancements */
 :global(.docs-page) {
+  max-width: 800px;
   margin: 0 auto;
   font-size: 1.1rem;
   line-height: 1.7;

@@ -230,3 +230,7 @@ body.immersive-reading .main-wrapper {
 body.immersive-reading article.markdown {
   max-width: 800px;
 }
+
+.theme-doc-markdown.markdown {
+  padding: 2rem;
+}
