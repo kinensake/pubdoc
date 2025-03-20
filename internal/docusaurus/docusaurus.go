@@ -13,7 +13,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 
 	html2md "github.com/JohannesKaufmann/html-to-markdown/v2"
-	"github.com/gosimple/slug"
 	"github.com/kinensake/pubdoc/internal/epub"
 	"github.com/spf13/cobra"
 )
@@ -75,7 +74,7 @@ func AddEpub(epubPath string) error {
 		return fmt.Errorf("epub.New: %v", err)
 	}
 
-	docDir := filepath.Join("docs", slug.Make(e.Package.Metadata.Title))
+	docDir := filepath.Join("docs", e.Package.Metadata.Title)
 	if err := os.Mkdir(docDir, os.ModePerm); err != nil {
 		return fmt.Errorf("Mkdir: %v", err)
 	}
@@ -226,7 +225,7 @@ func replaceDocHref(html string) (string, error) {
 		}
 
 		filename := filepath.Base(href)
-		if strings.HasSuffix(filename, ".html") {
+		if strings.HasSuffix(filename, ".html") && !strings.HasPrefix(href, "http") {
 			item.SetAttr("href", strings.TrimSuffix(filename, ".html")+".md")
 		}
 	}
