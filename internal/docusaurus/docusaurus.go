@@ -111,7 +111,7 @@ func AddEpub(epubPath string) error {
 			continue
 		}
 
-		filenameMD := strings.TrimSuffix(filename, ".html") + ".md"
+		filenameMD := strings.TrimSuffix(strings.TrimSuffix(filename, ".html"), ".xhtml") + ".md"
 		if err := writeToProject(md, docDir, i, filenameMD); err != nil {
 			cobra.CompErrorln(err.Error())
 			continue
@@ -225,8 +225,15 @@ func replaceDocHref(html string) (string, error) {
 		}
 
 		filename := filepath.Base(href)
-		if strings.HasSuffix(filename, ".html") && !strings.HasPrefix(href, "http") {
-			item.SetAttr("href", strings.TrimSuffix(filename, ".html")+".md")
+
+		if !strings.HasPrefix(href, "http") {
+			if strings.HasSuffix(filename, ".html") {
+				item.SetAttr("href", strings.TrimSuffix(filename, ".html")+".md")
+			}
+
+			if strings.HasSuffix(filename, ".xhtml") {
+				item.SetAttr("href", strings.TrimSuffix(filename, ".xhtml")+".md")
+			}
 		}
 	}
 
