@@ -15,9 +15,18 @@
   --ifm-color-primary-lightest: #3cad6e;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  /* Reader-specific variables */
+  --reader-font-size: 16px;
+  --reader-font-family: 'Georgia', serif;
+  --reader-line-height: 1.8;
+  --reader-text-color: #333;
+  --reader-bg-color: #faf8f1;
+  --reader-page-width: 800px;
+  --reader-heading-font: 'Palatino', 'Times New Roman', serif;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
+/* For readability concerns, you should choose a lighter palette in dark mode */
 [data-theme='dark'] {
   --ifm-color-primary: #25c2a0;
   --ifm-color-primary-dark: #21af90;
@@ -27,8 +36,197 @@
   --ifm-color-primary-lighter: #32d8b4;
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  /* Reader-specific dark mode variables */
+  --reader-text-color: #e0e0e0;
+  --reader-bg-color: #1c1e21;
 }
 
-.markdown {
-  padding: 20px;
+/* Book reading experience styles */
+article.markdown {
+  font-family: var(--reader-font-family);
+  font-size: var(--reader-font-size);
+  line-height: var(--reader-line-height);
+  color: var(--reader-text-color);
+  max-width: var(--reader-page-width);
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  font-family: var(--reader-heading-font);
+  letter-spacing: -0.02em;
+}
+
+.markdown h1 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.markdown h2 {
+  font-size: 2rem;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.markdown h3 {
+  font-size: 1.5rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.markdown p {
+  margin-bottom: 1.5rem;
+}
+
+.markdown img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 2rem 0;
+  display: block;
+}
+
+.markdown blockquote {
+  border-left: 3px solid var(--ifm-color-primary);
+  margin-left: 0;
+  padding-left: 1.5rem;
+  color: var(--ifm-color-emphasis-700);
+  font-style: italic;
+}
+
+/* First letter styling for chapters */
+.markdown [class^="docTitle_"]+div>p:first-of-type::first-letter {
+  float: left;
+  font-family: var(--reader-heading-font);
+  font-size: 4rem;
+  line-height: 1;
+  font-weight: bold;
+  margin-right: 0.5rem;
+  color: var(--ifm-color-primary);
+}
+
+/* Chapter number styling */
+.chapter-number {
+  display: block;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ifm-color-emphasis-600);
+  margin-bottom: 1rem;
+}
+
+/* Customizing the sidebar for books */
+.menu {
+  font-family: var(--ifm-font-family-base);
+}
+
+.menu__link {
+  padding: 0.5rem 0.75rem;
+}
+
+.menu__link--active {
+  font-weight: bold;
+}
+
+/* Book page layout */
+.main-wrapper {
+  max-width: 100%;
+  padding: 0;
+}
+
+.docPage_node_modules-\@docusaurus-theme-classic-lib-theme-DocPage-Layout-styles-module {
+  padding: 0 !important;
+}
+
+/* Reading progress indicators */
+.reading-progress-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.reading-progress-bar {
+  height: 100%;
+  background: var(--ifm-color-primary);
+  width: 0;
+  transition: width 0.2s ease;
+}
+
+/* Stylized chapter navigation */
+.book-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin: 4rem 0 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.book-navigation a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--ifm-color-primary);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.book-navigation a:hover {
+  color: var(--ifm-color-primary-dark);
+}
+
+.book-navigation a svg {
+  width: 20px;
+  height: 20px;
+}
+
+.book-navigation .prev-link svg {
+  margin-right: 0.5rem;
+}
+
+.book-navigation .next-link svg {
+  margin-left: 0.5rem;
+}
+
+/* Immersive reading mode button */
+.immersive-mode-toggle {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: var(--ifm-color-primary);
+  color: white;
+  border: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  transition: transform 0.3s ease;
+}
+
+.immersive-mode-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* Apply immersive reading mode */
+body.immersive-reading .navbar {
+  transform: translateY(-100%);
+}
+
+body.immersive-reading .main-wrapper {
+  margin-top: 0;
+}
+
+body.immersive-reading article.markdown {
+  max-width: 800px;
 }

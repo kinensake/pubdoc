@@ -29,3 +29,7 @@ local/
 .idea/
 
 */**/.DS_Store
+
+.cursor
+
+node_modules/

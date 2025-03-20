@@ -1,0 +1,12 @@
+{
+  "title": "Book Collection",
+  "description": "Browse our collection of books available to read online",
+  "slug": "/category/all-books",
+  "permalink": "/docs/category/all-books",
+  "navigation": {
+    "next": {
+      "title": "Tutorial Intro",
+      "permalink": "/docs/intro"
+    }
+  }
+}
