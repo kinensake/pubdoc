@@ -5,6 +5,7 @@ import (
 	"embed"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -224,7 +225,17 @@ func replaceDocHref(html string) (string, error) {
 			continue
 		}
 
-		filename := filepath.Base(href)
+		u, err := url.Parse(href)
+		if err != nil {
+			continue
+		}
+
+		unescaped, err := url.PathUnescape(u.Path)
+		if err != nil {
+			continue
+		}
+
+		filename := filepath.Base(unescaped)
 
 		if !strings.HasPrefix(href, "http") {
 			if strings.HasSuffix(filename, ".html") {
